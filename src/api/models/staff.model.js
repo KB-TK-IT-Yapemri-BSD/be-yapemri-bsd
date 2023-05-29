@@ -104,6 +104,7 @@ staffSchema.statics = {
 
         if (mongoose.Types.ObjectId.isValid(id)) {
             staff = await this.findById(id)
+                .populate('biodata_id')
                 .exec();
         }
         if (staff) {

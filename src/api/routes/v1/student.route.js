@@ -4,8 +4,6 @@ const controller = require('../../controllers/student.controller');
 const { authorize, ADMIN, ROLE1 } = require('../../middlewares/auth');
 const {
     listStudents,
-    createStudent,
-    updateStudent,
 } = require('../../validations/student.validation');
 
 const router = express.Router();
@@ -44,6 +42,7 @@ router
      * @apiParam  {String}         [birthOrder]      Student's birth of order
      * @apiParam  {String}         [numOfSiblings]   Student's number of siblings
      * @apiParam  {String}         [statusInFamily]  Student's status in family
+     * @apiParam  {String}         [studentStatus]   Student's education status
      * @apiParam  {Number}         [height]          Student's height
      * @apiParam  {String}         [bloodType]       Student's blood type
      * @apiParam  {String}         [diseaseHistory]  Student's history of disease
@@ -56,7 +55,7 @@ router
      * @apiError (Unauthorized 401)  Unauthorized  Only authenticated users can access the data
      * @apiError (Forbidden 403)     Forbidden     Only admins can access the data
      */
-    .get(authorize(ROLE1), validate(listStudents), controller.list)
+    .get(authorize(), validate(listStudents), controller.list)
     /**
      * @api {post} v1/students Create Student
      * @apiDescription Create a new student
@@ -82,6 +81,7 @@ router
      * @apiParam  {String}         [birthOrder]      Student's birth of order
      * @apiParam  {String}         [numOfSiblings]   Student's number of siblings
      * @apiParam  {String}         [statusInFamily]  Student's status in family
+     * @apiParam  {String}         [studentStatus]   Student's education status
      * @apiParam  {Number}         [height]          Student's height
      * @apiParam  {String}         [bloodType]       Student's blood type
      * @apiParam  {String}         [diseaseHistory]  Student's history of disease
@@ -112,7 +112,7 @@ router
      *
      * @apiError (Bad Request 400)   ValidationError  Some parameters may contain invalid values
      */
-    .post(authorize(ADMIN), validate(createStudent), controller.create);
+    .post(authorize(), controller.create);
 
 router
     .route('/:studentId')
@@ -141,6 +141,7 @@ router
      * @apiSuccess {String}  birthOrder       Student's birth of order in family
      * @apiSuccess {String}  numOfSiblings    Student's number of siblings
      * @apiSuccess {String}  statusInFamily   Student's status in family
+     * @apiSuccess {String}  studentStatus    Student's education status
      * @apiSuccess {Number}  height           Student's height
      * @apiSuccess {String}  bloodType        Student's blood type
      * @apiSuccess {String}  diseaseHistory   Student's history of disease
@@ -179,6 +180,7 @@ router
      * @apiParam  {String}         [birthOrder]      Student's birth of order
      * @apiParam  {String}         [numOfSiblings]   Student's number of siblings
      * @apiParam  {String}         [statusInFamily]  Student's status in family
+     * @apiParam  {String}         [studentStatus]   Student's education status
      * @apiParam  {Number}         [height]          Student's height
      * @apiParam  {String}         [bloodType]       Student's blood type
      * @apiParam  {String}         [diseaseHistory]  Student's history of disease
@@ -199,6 +201,7 @@ router
      * @apiSuccess {String}  birthOrder       Student's birth of order in family
      * @apiSuccess {String}  numOfSiblings    Student's number of siblings
      * @apiSuccess {String}  statusInFamily   Student's status in family
+     * @apiSuccess {String}  studentStatus    Student's education status
      * @apiSuccess {Number}  height           Student's height
      * @apiSuccess {String}  bloodType        Student's blood type
      * @apiSuccess {String}  diseaseHistory   Student's history of disease
@@ -211,7 +214,7 @@ router
      * @apiError (Forbidden 403)    Forbidden Only user with same id or admins can modify the data
      * @apiError (Not Found 404)    NotFound     User does not exist
      */
-    .patch(authorize(ADMIN), validate(updateStudent), controller.update)
+    .patch(authorize(), controller.update)
 
     /**
      * @api {patch} v1/students/:id Delete Student

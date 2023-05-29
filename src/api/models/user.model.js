@@ -11,7 +11,7 @@ const { env, jwtSecret, jwtExpirationInterval } = require('../../config/vars');
 /**
 * User Roles
 */
-const roles = ['parents', 'principal', 'teacher', 'admin'];
+const roles = ['parents', 'principal', 'teachers', 'admin'];
 const Biodata = ['Student', 'Staff'];
 
 /**

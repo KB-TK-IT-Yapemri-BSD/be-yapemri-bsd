@@ -10,7 +10,8 @@ const TEACHERS = 'teachers';
 
 const LOGGED_USER = '_loggedUser';
 
-const ROLE1 = ['teachers', 'admin'];
+const ROLE1 = ['teachers', 'admin', 'parents'];
+const STAFFS = ['teachers', 'admin', 'principal'];
 
 const handleJWT = (req, res, next, roles) => async (err, user, info) => {
   const error = err || info;
@@ -62,6 +63,7 @@ exports.TEACHERS = TEACHERS;
 exports.LOGGED_USER = LOGGED_USER;
 
 exports.ROLE1 = ROLE1;
+exports.STAFFS = STAFFS;
 
 exports.authorize = (roles = User.roles) => (req, res, next) => passport.authenticate(
   'jwt', { session: false },

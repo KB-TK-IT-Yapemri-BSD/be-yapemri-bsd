@@ -63,6 +63,34 @@ exports.list = async (req, res, next) => {
 };
 
 /**
+ * Get father list
+ * @public
+ */
+exports.listFathers = async (req, res, next) => {
+    try {
+        const parents = await Parent.listFathers(req.query);
+        const transformedParents = parents.map((parent) => parent.transform());
+        res.json(transformedParents);
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Get mother list
+ * @public
+ */
+exports.listMothers = async (req, res, next) => {
+    try {
+        const parents = await Parent.listMothers(req.query);
+        const transformedParents = parents.map((parent) => parent.transform());
+        res.json(transformedParents);
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * Delete parent
  * @public
  */

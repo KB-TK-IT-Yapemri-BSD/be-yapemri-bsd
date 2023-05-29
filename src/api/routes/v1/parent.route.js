@@ -49,6 +49,7 @@ router
      * @apiError (Forbidden 403)     Forbidden     Only admins can access the data
      */
     .get(authorize(ROLE1), validate(listParents), controller.list)
+
     /**
      * @api {post} v1/parents Create Parent
      * @apiDescription Create a new parent
@@ -93,6 +94,14 @@ router
      * @apiError (Bad Request 400)   ValidationError  Some parameters may contain invalid values
      */
     .post(authorize(ADMIN), validate(createParent), controller.create);
+
+router
+    .route('/fathers')
+    .get(authorize(ROLE1), validate(listParents), controller.listFathers);
+
+router
+    .route('/mothers')
+    .get(authorize(ROLE1), validate(listParents), controller.listMothers);
 
 router
     .route('/:parentId')

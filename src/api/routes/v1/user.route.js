@@ -3,8 +3,6 @@ const validate = require('express-validation');
 const controller = require('../../controllers/user.controller');
 const { authorize, ADMIN } = require('../../middlewares/auth');
 const {
-  listUsers,
-  createUser,
   replaceUser,
   updateUser,
 } = require('../../validations/user.validation');
@@ -39,7 +37,7 @@ router
    * @apiError (Unauthorized 401)  Unauthorized  Only authenticated users can access the data
    * @apiError (Forbidden 403)     Forbidden     Only admins can access the data
    */
-  .get(authorize(ADMIN), validate(listUsers), controller.list)
+  .get(authorize(), controller.list)
   /**
    * @api {post} v1/users Create User
    * @apiDescription Create a new user
@@ -65,7 +63,7 @@ router
    * @apiError (Unauthorized 401)  Unauthorized     Only authenticated users can create the data
    * @apiError (Forbidden 403)     Forbidden        Only admins can create the data
    */
-  .post(authorize(ADMIN), validate(createUser), controller.create);
+  .post(authorize(), controller.create);
 
 router
   .route('/profile')
@@ -184,6 +182,6 @@ router
    * @apiError (Forbidden 403)    Forbidden     Only user with same id or admins can delete the data
    * @apiError (Not Found 404)    NotFound      User does not exist
    */
-  .delete(authorize(ADMIN), controller.remove);
+  .delete(authorize(), controller.remove);
 
 module.exports = router;

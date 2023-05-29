@@ -50,7 +50,7 @@ const studentSchema = new mongoose.Schema({
     picture: {
         type: String,
         required: false,
-        default: undefined,
+        default: '',
     },
     address: {
         type: String,
@@ -72,9 +72,20 @@ const studentSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    studentStatus: {
+        type: String,
+        required: false,
+        default: true,
+    },
     height: {
         type: Number,
         required: true,
+        default: 0,
+    },
+    weight: {
+        type: Number,
+        required: true,
+        default: 0,
     },
     bloodType: {
         type: String,
@@ -84,7 +95,7 @@ const studentSchema = new mongoose.Schema({
     diseaseHistory: {
         type: String,
         required: false,
-        default: undefined,
+        default: '',
     },
     distanceToHome: {
         type: String,
@@ -97,13 +108,13 @@ const studentSchema = new mongoose.Schema({
     mother_id: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        default: undefined,
+        default: '',
         ref: Parent,
     },
     father_id: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        default: undefined,
+        default: '',
         ref: Parent,
     },
 }, {
@@ -126,7 +137,7 @@ studentSchema.method({
         const fields = [
             'id',
             'grade', 'firstName', 'lastName', 'birthplace', 'birthdate', 'gender', 'religion', 'citizenship', 'picture', 'address',
-            'nickname', 'birthOrder', 'numOfSiblings', 'statusInFamily', 'height', 'bloodType', 'diseaseHistory', 'distanceToHome', 'language',
+            'nickname', 'birthOrder', 'numOfSiblings', 'statusInFamily', 'studentStatus', 'height', 'weight', 'bloodType', 'diseaseHistory', 'distanceToHome', 'language',
             'mother_id', 'father_id',
             'createdAt', 'updatedAt',
         ];
@@ -154,6 +165,8 @@ studentSchema.statics = {
 
         if (mongoose.Types.ObjectId.isValid(id)) {
             student = await this.findById(id)
+                .populate('mother_id')
+                .populate('father_id')
                 .exec();
         }
         if (student) {
@@ -178,8 +191,8 @@ studentSchema.statics = {
         perPage = 30,
     }) {
         return this.find()
-            .populate('mother_id')
             .populate('father_id')
+            .populate('mother_id')
             .sort({ createdAt: -1 })
             .skip(perPage * (page - 1))
             .limit(perPage)

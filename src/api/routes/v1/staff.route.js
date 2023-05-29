@@ -1,7 +1,7 @@
 const express = require('express');
 const validate = require('express-validation');
 const controller = require('../../controllers/staff.controller');
-const { authorize, ADMIN } = require('../../middlewares/auth');
+const { authorize, ADMIN, STAFFS } = require('../../middlewares/auth');
 const {
     listStaffs,
     createStaff,
@@ -119,7 +119,7 @@ router
      * @apiError (Forbidden 403)    Forbidden   Only user with same id or admins can access the data
      * @apiError (Not Found 404)    NotFound     User does not exist
      */
-    .get(authorize(ADMIN), controller.get)
+    .get(authorize(), controller.get)
 
     /**
      * @api {patch} v1/staffs/:id Update Staff

@@ -137,6 +137,42 @@ parentSchema.statics = {
             .limit(perPage)
             .exec();
     },
+
+    /**
+     * List of fathers in descending order of 'createdAt' timestamp.
+     *
+     * @param {number} skip - Number of parents to be skipped.
+     * @param {number} limit - Limit number of parents to be returned.
+     * @returns {Promise<Parent[]>}
+     */
+    listFathers({
+        page = 1,
+        perPage = 30,
+    }) {
+        return this.find({ gender: 'false' })
+            .sort({ createdAt: -1 })
+            .skip(perPage * (page - 1))
+            .limit(perPage)
+            .exec();
+    },
+
+    /**
+     * List of mothers in descending order of 'createdAt' timestamp.
+     *
+     * @param {number} skip - Number of parents to be skipped.
+     * @param {number} limit - Limit number of parents to be returned.
+     * @returns {Promise<Parent[]>}
+     */
+    listMothers({
+        page = 1,
+        perPage = 30,
+    }) {
+        return this.find({ gender: 'true' })
+            .sort({ createdAt: -1 })
+            .skip(perPage * (page - 1))
+            .limit(perPage)
+            .exec();
+    },
 };
 
 module.exports = mongoose.model('Parent', parentSchema);
