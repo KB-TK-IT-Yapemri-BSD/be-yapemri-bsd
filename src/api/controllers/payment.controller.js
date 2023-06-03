@@ -55,7 +55,6 @@ exports.update = async (req, res, next) => {
 exports.list = async (req, res, next) => {
     try {
         const payments = await Payment.list(req.query);
-        console.log(req.query);
         const transformedPayments = payments.map((payment) => payment.transform());
         res.json(transformedPayments);
     } catch (error) {
@@ -69,7 +68,7 @@ exports.list = async (req, res, next) => {
  */
 exports.filter = async (req, res, next) => {
     try {
-        const payments = await Payment.filter(req.query);
+        const payments = await Payment.find(req.query).populate('user_id').populate('type_id');
         const transformedPayments = payments.map((payment) => payment.transform());
         res.json(transformedPayments);
     } catch (error) {

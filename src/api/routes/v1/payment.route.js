@@ -5,7 +5,6 @@ const { authorize, ADMIN, ROLE1 } = require('../../middlewares/auth');
 const {
     listPayments,
     createPayment,
-    updatePayment,
 } = require('../../validations/payment.validation');
 
 const router = express.Router();
@@ -71,7 +70,7 @@ router
 
 router
     .route('/filter')
-    .get(authorize(ADMIN), controller.filter);
+    .get(authorize(), controller.filter);
 
 router
     .route('/:paymentId')
@@ -133,7 +132,7 @@ router
        * @apiError (Forbidden 403)    Forbidden Only user with same id or admins can modify the data
        * @apiError (Not Found 404)    NotFound     User does not exist
        */
-    .patch(authorize(ADMIN), validate(updatePayment), controller.update)
+    .patch(authorize(), controller.update)
     /**
      * @api {patch} v1/payments/:id Delete Payment
      * @apiDescription Delete a payment

@@ -11,6 +11,10 @@ const paymentTypeSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    deadline: {
+        type: Date,
+        required: true,
+    },
 }, {
     timestamps: true,
 });
@@ -28,7 +32,7 @@ const paymentTypeSchema = new mongoose.Schema({
 paymentTypeSchema.method({
     transform() {
         const transformed = {};
-        const fields = ['id', 'type', 'createdAt'];
+        const fields = ['id', 'type', 'deadline', 'createdAt'];
 
         fields.forEach((field) => {
             transformed[field] = this[field];

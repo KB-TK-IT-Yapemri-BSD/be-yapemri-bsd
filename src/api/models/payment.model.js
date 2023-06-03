@@ -3,7 +3,7 @@ const httpStatus = require('http-status');
 const APIError = require('../errors/api-error');
 
 const PaymentType = require('./paymentType.model');
-const User = require('./user.model');
+const Student = require('./student.model');
 
 /**
  * status = {
@@ -21,35 +21,39 @@ const paymentSchema = new mongoose.Schema({
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: User,
+        ref: Student,
     },
     type_id: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: PaymentType,
     },
-    deadline: {
+    payment_date: {
         type: Date,
-        required: true,
+        required: false,
     },
     amount: {
         type: Number,
-        required: true,
+        required: false,
     },
     status: {
-        type: String,
+        type: Boolean,
         required: false,
-        default: null,
+        default: false,
     },
     receipt: {
         type: String,
         required: false,
-        default: null,
+        default: undefined,
     },
     isOverdue: {
-        type: Boolean,
+        type: String,
         required: false,
-        default: false,
+        default: undefined,
+    },
+    reason: {
+        type: String,
+        required: false,
     },
 }, {
     timestamps: true,
@@ -68,7 +72,7 @@ const paymentSchema = new mongoose.Schema({
 paymentSchema.method({
     transform() {
         const transformed = {};
-        const fields = ['id', 'user_id', 'type_id', 'deadline', 'amount', 'status', 'receipt', 'isOverdue', 'createdAt', 'updatedAt'];
+        const fields = ['id', 'user_id', 'type_id', 'deadline', 'amount', 'status', 'payment_date', 'receipt', 'isOverdue', 'reason', 'createdAt', 'updatedAt'];
 
         fields.forEach((field) => {
             transformed[field] = this[field];
