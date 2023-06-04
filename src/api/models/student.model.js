@@ -73,7 +73,7 @@ const studentSchema = new mongoose.Schema({
         required: true,
     },
     studentStatus: {
-        type: String,
+        type: Boolean,
         required: false,
         default: true,
     },
