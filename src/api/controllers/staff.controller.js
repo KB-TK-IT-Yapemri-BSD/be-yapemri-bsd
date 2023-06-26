@@ -1,3 +1,5 @@
+const { AsyncParser } = require('@json2csv/node');
+
 const httpStatus = require('http-status');
 const Staff = require('../models/staff.model');
 
@@ -57,6 +59,46 @@ exports.list = async (req, res, next) => {
         const staffs = await Staff.list(req.query);
         const transformedStaffs = staffs.map((staff) => staff.transform());
         res.json(transformedStaffs);
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Get download staff list
+ * @public
+ */
+exports.download = async (req, res, next) => {
+    try {
+        const params = req.query || {};
+        const staffs = await Staff.listDownload(params);
+        const transformedStaffs = staffs.map((staff) => staff.transform());
+
+        if (transformedStaffs.length !== 0) {
+            const opts = {};
+            const transformOpts = {};
+            const asyncOpts = {};
+            const parser = new AsyncParser(opts, transformOpts, asyncOpts);
+            const csv = await parser.parse(transformedStaffs).promise();
+
+            if (params.start && params.end) {
+                res.setHeader('Content-Type', 'text/csv');
+                res.setHeader('Content-Disposition', 'attachment; filename=\"' + `staff_report_start_${new Date(params.start).toLocaleDateString()}_end_${new Date(params.end).toLocaleDateString()}.csv` + '\"');
+            } else if (!params.start && params.end) {
+                res.setHeader('Content-Type', 'text/csv');
+                res.setHeader('Content-Disposition', 'attachment; filename=\"' + `staff_report_end_${new Date(params.end).toLocaleDateString()}.csv` + '\"');
+            } else if (!params.end && params.start) {
+                res.setHeader('Content-Type', 'text/csv');
+                res.setHeader('Content-Disposition', 'attachment; filename=\"' + `staff_report_start_${new Date(params.start).toLocaleDateString()}.csv` + '\"');
+            } else {
+                res.setHeader('Content-Type', 'text/csv');
+                res.setHeader('Content-Disposition', 'attachment; filename=\"' + 'staff_report_all.csv' + '\"');
+            }
+
+            res.status(200).send(csv);
+        } else if (transformedStaffs.length === 0) {
+            res.status(400).send();
+        }
     } catch (error) {
         next(error);
     }

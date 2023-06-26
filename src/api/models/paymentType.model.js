@@ -85,6 +85,29 @@ paymentTypeSchema.statics = {
             .limit(perPage)
             .exec();
     },
+
+    async listDownload({
+        start,
+        end,
+    }) {
+        let result;
+        if (start && end) {
+            result = await this.find({
+                createdAt: { $gte: new Date(start), $lte: new Date(end) },
+            });
+        } else if (!start && end) {
+            result = await this.find({
+                createdAt: { $lte: new Date(end) },
+            });
+        } else if (!end && start) {
+            result = await this.find({
+                createdAt: { $gte: new Date(start) },
+            });
+        } else {
+            result = this.find();
+        }
+        return result;
+    },
 };
 
 /**

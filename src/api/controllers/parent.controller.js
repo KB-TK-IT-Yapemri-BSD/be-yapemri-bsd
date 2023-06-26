@@ -1,3 +1,5 @@
+const { AsyncParser } = require('@json2csv/node');
+
 const httpStatus = require('http-status');
 const Parent = require('../models/parent.model');
 
@@ -57,6 +59,46 @@ exports.list = async (req, res, next) => {
         const parents = await Parent.list(req.query);
         const transformedParents = parents.map((parent) => parent.transform());
         res.json(transformedParents);
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Get download parent list
+ * @public
+ */
+exports.download = async (req, res, next) => {
+    try {
+        const params = req.query || {};
+        const parents = await Parent.listDownload(params);
+        const transformedParents = parents.map((parent) => parent.transform());
+
+        if (transformedParents.length !== 0) {
+            const opts = {};
+            const transformOpts = {};
+            const asyncOpts = {};
+            const parser = new AsyncParser(opts, transformOpts, asyncOpts);
+            const csv = await parser.parse(transformedParents).promise();
+
+            if (params.start && params.end) {
+                res.setHeader('Content-Type', 'text/csv');
+                res.setHeader('Content-Disposition', 'attachment; filename=\"' + `parent_report_start_${new Date(params.start).toLocaleDateString()}_end_${new Date(params.end).toLocaleDateString()}.csv` + '\"');
+            } else if (!params.start && params.end) {
+                res.setHeader('Content-Type', 'text/csv');
+                res.setHeader('Content-Disposition', 'attachment; filename=\"' + `parent_report_end_${new Date(params.end).toLocaleDateString()}.csv` + '\"');
+            } else if (!params.end && params.start) {
+                res.setHeader('Content-Type', 'text/csv');
+                res.setHeader('Content-Disposition', 'attachment; filename=\"' + `parent_report_start_${new Date(params.start).toLocaleDateString()}.csv` + '\"');
+            } else {
+                res.setHeader('Content-Type', 'text/csv');
+                res.setHeader('Content-Disposition', 'attachment; filename=\"' + 'parent_report_all.csv' + '\"');
+            }
+
+            res.status(200).send(csv);
+        } else if (transformedParents.length === 0) {
+            res.status(400).send();
+        }
     } catch (error) {
         next(error);
     }

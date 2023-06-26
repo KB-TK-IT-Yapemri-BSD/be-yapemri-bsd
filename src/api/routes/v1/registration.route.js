@@ -78,6 +78,10 @@ router
     .post(validate(createForm), controller.create);
 
 router
+    .route('/download')
+    .get(controller.download);
+
+router
     .route('/:formId')
     /**
      * @api {get} v1/forms/:id Get Form

@@ -73,6 +73,10 @@ router
     .get(authorize(), controller.filter);
 
 router
+    .route('/download')
+    .get(controller.download);
+
+router
     .route('/:paymentId')
     /**
      * @api {get} v1/payments/:id Get Payment

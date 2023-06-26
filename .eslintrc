@@ -5,7 +5,10 @@
     "no-unused-vars": ["error", { "argsIgnorePattern": "next" }],
     "no-use-before-define": ["error", { "variables": false }],
     "no-multi-str": 0,
+    "no-useless-escape": 0,
+    "no-useless-concat": 0,
     "linebreak-style": "off",
+    "object-shorthand": ["error"],
     "indent": "off"
   },
   "env": {

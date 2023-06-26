@@ -1,3 +1,5 @@
+const { AsyncParser } = require('@json2csv/node');
+
 const httpStatus = require('http-status');
 const Student = require('../models/student.model');
 
@@ -57,6 +59,46 @@ exports.list = async (req, res, next) => {
         const students = await Student.list(req.query);
         const transformedStudents = students.map((student) => student.transform());
         res.json(transformedStudents);
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Get download student list
+ * @public
+ */
+exports.download = async (req, res, next) => {
+    try {
+        const params = req.query || {};
+        const students = await Student.listDownload(params);
+        const transformedStudents = students.map((student) => student.transform());
+
+        if (transformedStudents.length !== 0) {
+            const opts = {};
+            const transformOpts = {};
+            const asyncOpts = {};
+            const parser = new AsyncParser(opts, transformOpts, asyncOpts);
+            const csv = await parser.parse(transformedStudents).promise();
+
+            if (params.start && params.end) {
+                res.setHeader('Content-Type', 'text/csv');
+                res.setHeader('Content-Disposition', 'attachment; filename=\"' + `student_report_start_${new Date(params.start).toLocaleDateString()}_end_${new Date(params.end).toLocaleDateString()}.csv` + '\"');
+            } else if (!params.start && params.end) {
+                res.setHeader('Content-Type', 'text/csv');
+                res.setHeader('Content-Disposition', 'attachment; filename=\"' + `student_report_end_${new Date(params.end).toLocaleDateString()}.csv` + '\"');
+            } else if (!params.end && params.start) {
+                res.setHeader('Content-Type', 'text/csv');
+                res.setHeader('Content-Disposition', 'attachment; filename=\"' + `student_report_start_${new Date(params.start).toLocaleDateString()}.csv` + '\"');
+            } else {
+                res.setHeader('Content-Type', 'text/csv');
+                res.setHeader('Content-Disposition', 'attachment; filename=\"' + 'student_report_all.csv' + '\"');
+            }
+
+            res.status(200).send(csv);
+        } else if (transformedStudents.length === 0) {
+            res.status(400).send();
+        }
     } catch (error) {
         next(error);
     }

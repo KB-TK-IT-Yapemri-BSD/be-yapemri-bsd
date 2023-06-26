@@ -115,6 +115,10 @@ router
     .post(authorize(), controller.create);
 
 router
+    .route('/download')
+    .get(controller.download);
+
+router
     .route('/:studentId')
     /**
      * @api {get} v1/students/:id Get Student

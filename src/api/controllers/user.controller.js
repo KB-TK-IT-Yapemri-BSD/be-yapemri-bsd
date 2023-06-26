@@ -1,3 +1,5 @@
+const { AsyncParser } = require('@json2csv/node');
+
 const httpStatus = require('http-status');
 const { omit } = require('lodash');
 const User = require('../models/user.model');
@@ -51,8 +53,8 @@ exports.replace = async (req, res, next) => {
   try {
     const { user } = req.locals;
     const newUser = new User(req.body);
-    const ommitRole = user.role !== 'admin' ? 'role' : '';
-    const newUserObject = omit(newUser.toObject(), '_id', ommitRole);
+    // const ommitRole = user.role !== 'admin' ? 'role' : '';
+    const newUserObject = omit(newUser.toObject(), '_id');
 
     await user.updateOne(newUserObject, { override: true, upsert: true });
     const savedUser = await User.findById(user._id);
@@ -86,6 +88,46 @@ exports.list = async (req, res, next) => {
     const users = await User.list(req.query);
     const transformedUsers = users.map((user) => user.transform());
     res.json(transformedUsers);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get download user list
+ * @public
+ */
+exports.download = async (req, res, next) => {
+  try {
+    const params = req.query || {};
+    const users = await User.listDownload(params);
+    const transformedUsers = users.map((user) => user.transform());
+
+    if (transformedUsers.length !== 0) {
+      const opts = {};
+      const transformOpts = {};
+      const asyncOpts = {};
+      const parser = new AsyncParser(opts, transformOpts, asyncOpts);
+      const csv = await parser.parse(transformedUsers).promise();
+
+      if (params.start && params.end) {
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=\"' + `user_report_start_${new Date(params.start).toLocaleDateString()}_end_${new Date(params.end).toLocaleDateString()}.csv` + '\"');
+      } else if (!params.start && params.end) {
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=\"' + `user_report_end_${new Date(params.end).toLocaleDateString()}.csv` + '\"');
+      } else if (!params.end && params.start) {
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=\"' + `user_report_start_${new Date(params.start).toLocaleDateString()}.csv` + '\"');
+      } else {
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=\"' + 'user_report_all.csv' + '\"');
+      }
+
+      res.status(200).send(csv);
+    } else if (transformedUsers.length === 0) {
+      res.status(400).send();
+    }
   } catch (error) {
     next(error);
   }

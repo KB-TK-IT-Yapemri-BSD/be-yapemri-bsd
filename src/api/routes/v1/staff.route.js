@@ -1,7 +1,7 @@
 const express = require('express');
 const validate = require('express-validation');
 const controller = require('../../controllers/staff.controller');
-const { authorize, ADMIN, STAFFS } = require('../../middlewares/auth');
+const { authorize, ADMIN } = require('../../middlewares/auth');
 const {
     listStaffs,
     createStaff,
@@ -88,6 +88,10 @@ router
      * @apiError (Bad Request 400)   ValidationError  Some parameters may contain invalid values
      */
     .post(authorize(ADMIN), validate(createStaff), controller.create);
+
+router
+    .route('/download')
+    .get(controller.download);
 
 router
     .route('/:staffId')

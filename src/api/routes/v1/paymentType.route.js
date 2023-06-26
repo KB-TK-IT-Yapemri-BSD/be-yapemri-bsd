@@ -58,6 +58,10 @@ router
     .post(authorize(ADMIN), validate(createPaymentType), controller.create);
 
 router
+    .route('/download')
+    .get(controller.download);
+
+router
     .route('/:paymentTypeId')
     /**
      * @api {get} v1/payments/types/:id Get Payment Type

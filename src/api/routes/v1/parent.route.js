@@ -49,7 +49,6 @@ router
      * @apiError (Forbidden 403)     Forbidden     Only admins can access the data
      */
     .get(authorize(ROLE1), validate(listParents), controller.list)
-
     /**
      * @api {post} v1/parents Create Parent
      * @apiDescription Create a new parent
@@ -102,6 +101,10 @@ router
 router
     .route('/mothers')
     .get(authorize(ROLE1), validate(listParents), controller.listMothers);
+
+router
+    .route('/download')
+    .get(controller.download);
 
 router
     .route('/:parentId')
@@ -179,7 +182,7 @@ router
      *
      * @apiError (Bad Request 400)  ValidationError  Some parameters may contain invalid values
      * @apiError (Unauthorized 401) Unauthorized Only authenticated users can modify the data
-     * @apiError (Forbidden 403)    Forbidden Only user with same id or admins can modify the data
+     * @apiError (Forbidden 403)    Forbidden Only user with same id or admins can modify
      * @apiError (Not Found 404)    NotFound     User does not exist
      */
     .patch(authorize(ADMIN), validate(updateParent), controller.update)

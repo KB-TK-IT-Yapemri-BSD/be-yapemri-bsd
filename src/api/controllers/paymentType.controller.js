@@ -1,3 +1,5 @@
+const { AsyncParser } = require('@json2csv/node');
+
 const httpStatus = require('http-status');
 const PaymentType = require('../models/paymentType.model');
 
@@ -45,6 +47,46 @@ exports.list = async (req, res, next) => {
         const paymentTypes = await PaymentType.list(req.query);
         const transformedPaymentTypes = paymentTypes.map((paymentType) => paymentType.transform());
         res.json(transformedPaymentTypes);
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Get download payment type list
+ * @public
+ */
+exports.download = async (req, res, next) => {
+    try {
+        const params = req.query || {};
+        const paymentTypes = await PaymentType.listDownload(params);
+        const transformedPaymentTypes = paymentTypes.map((paymentType) => paymentType.transform());
+
+        if (transformedPaymentTypes.length !== 0) {
+            const opts = {};
+            const transformOpts = {};
+            const asyncOpts = {};
+            const parser = new AsyncParser(opts, transformOpts, asyncOpts);
+            const csv = await parser.parse(transformedPaymentTypes).promise();
+
+            if (params.start && params.end) {
+                res.setHeader('Content-Type', 'text/csv');
+                res.setHeader('Content-Disposition', 'attachment; filename=\"' + `paymentType_report_start_${new Date(params.start).toLocaleDateString()}_end_${new Date(params.end).toLocaleDateString()}.csv` + '\"');
+            } else if (!params.start && params.end) {
+                res.setHeader('Content-Type', 'text/csv');
+                res.setHeader('Content-Disposition', 'attachment; filename=\"' + `paymentType_report_end_${new Date(params.end).toLocaleDateString()}.csv` + '\"');
+            } else if (!params.end && params.start) {
+                res.setHeader('Content-Type', 'text/csv');
+                res.setHeader('Content-Disposition', 'attachment; filename=\"' + `paymentType_report_start_${new Date(params.start).toLocaleDateString()}.csv` + '\"');
+            } else {
+                res.setHeader('Content-Type', 'text/csv');
+                res.setHeader('Content-Disposition', 'attachment; filename=\"' + 'paymentType_report_all.csv' + '\"');
+            }
+
+            res.status(200).send(csv);
+        } else if (transformedPaymentTypes.length === 0) {
+            res.status(400).send();
+        }
     } catch (error) {
         next(error);
     }

@@ -98,7 +98,7 @@ userSchema.pre('save', async function save(next) {
 userSchema.method({
   transform() {
     const transformed = {};
-    const fields = ['id', 'name', 'email', 'role', 'picture', 'biodata_id', 'biodataType', 'createdAt'];
+    const fields = ['id', 'name', 'email', 'role', 'biodata_id', 'biodataType', 'picture', 'createdAt'];
 
     fields.forEach((field) => {
       transformed[field] = this[field];
@@ -240,6 +240,29 @@ userSchema.statics = {
     return this.create({
       services: { [service]: id }, email, password, name, picture,
     });
+  },
+
+  async listDownload({
+    start,
+    end,
+  }) {
+    let result;
+    if (start && end) {
+      result = await this.find({
+        createdAt: { $gte: new Date(start), $lte: new Date(end) },
+      });
+    } else if (!start && end) {
+      result = await this.find({
+        createdAt: { $lte: new Date(end) },
+      });
+    } else if (!end && start) {
+      result = await this.find({
+        createdAt: { $gte: new Date(start) },
+      });
+    } else {
+      result = this.find();
+    }
+    return result;
   },
 };
 

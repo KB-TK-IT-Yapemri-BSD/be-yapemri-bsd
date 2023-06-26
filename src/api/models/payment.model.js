@@ -51,6 +51,11 @@ const paymentSchema = new mongoose.Schema({
         required: false,
         default: undefined,
     },
+    modified: {
+        type: Boolean,
+        required: false,
+        default: false,
+    },
     reason: {
         type: String,
         required: false,
@@ -72,7 +77,7 @@ const paymentSchema = new mongoose.Schema({
 paymentSchema.method({
     transform() {
         const transformed = {};
-        const fields = ['id', 'user_id', 'type_id', 'deadline', 'amount', 'status', 'payment_date', 'receipt', 'isOverdue', 'reason', 'createdAt', 'updatedAt'];
+        const fields = ['id', 'user_id', 'type_id', 'deadline', 'amount', 'status', 'payment_date', 'receipt', 'isOverdue', 'modified', 'reason', 'createdAt', 'updatedAt'];
 
         fields.forEach((field) => {
             transformed[field] = this[field];
@@ -146,6 +151,29 @@ paymentSchema.statics = {
             .populate('user_id')
             .populate('type_id')
             .exec();
+    },
+
+    async listDownload({
+        start,
+        end,
+    }) {
+        let result;
+        if (start && end) {
+            result = await this.find({
+                createdAt: { $gte: new Date(start), $lte: new Date(end) },
+            });
+        } else if (!start && end) {
+            result = await this.find({
+                createdAt: { $lte: new Date(end) },
+            });
+        } else if (!end && start) {
+            result = await this.find({
+                createdAt: { $gte: new Date(start) },
+            });
+        } else {
+            result = this.find();
+        }
+        return result;
     },
 };
 
