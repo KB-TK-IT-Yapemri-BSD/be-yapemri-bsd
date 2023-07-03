@@ -53,6 +53,7 @@ const userSchema = new mongoose.Schema({
   picture: {
     type: String,
     trim: true,
+    default: '',
   },
   biodata_id: {
     type: mongoose.Schema.Types.ObjectId,

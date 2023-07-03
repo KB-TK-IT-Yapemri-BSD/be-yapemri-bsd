@@ -44,12 +44,12 @@ const paymentSchema = new mongoose.Schema({
     receipt: {
         type: String,
         required: false,
-        default: undefined,
+        default: '',
     },
     isOverdue: {
         type: String,
         required: false,
-        default: undefined,
+        default: '',
     },
     modified: {
         type: Boolean,
@@ -125,8 +125,8 @@ paymentSchema.statics = {
      * @returns {Promise<Payment[]>}
      */
     list({
-        page = 1,
-        perPage = 30,
+        page,
+        perPage,
     }) {
         return this.find()
             .populate('user_id')
@@ -146,10 +146,15 @@ paymentSchema.statics = {
      */
     filter({
         status,
+        page,
+        perPage,
     }) {
         return this.find({ status })
             .populate('user_id')
             .populate('type_id')
+            .sort({ createdAt: -1 })
+            .skip(perPage * (page - 1))
+            .limit(perPage)
             .exec();
     },
 

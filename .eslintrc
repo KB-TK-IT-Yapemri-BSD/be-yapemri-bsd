@@ -7,6 +7,7 @@
     "no-multi-str": 0,
     "no-useless-escape": 0,
     "no-useless-concat": 0,
+    "no-unexpected-token": "off",
     "linebreak-style": "off",
     "object-shorthand": ["error"],
     "indent": "off"

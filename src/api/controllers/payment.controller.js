@@ -2,6 +2,7 @@ const { AsyncParser } = require('@json2csv/node');
 
 const httpStatus = require('http-status');
 const Payment = require('../models/payment.model');
+const { handleFileUploadReceipt } = require('../../config/cloudinary');
 
 /**
  * Load payments and append to req.
@@ -42,9 +43,31 @@ exports.update = async (req, res, next) => {
     try {
         const { payment } = req.locals;
 
-        await payment.updateOne(req.body);
+        const { data } = req.body;
+
+        if (req.file) {
+            const receiptUploaded = await handleFileUploadReceipt(req.file.path);
+
+            await payment.updateOne({ ...data, receipt: receiptUploaded });
+        } else {
+            await payment.updateOne(req.body);
+        }
+
         const savedPayment = await Payment.findById(payment._id);
         res.json(savedPayment.transform());
+    } catch (error) {
+        next((error));
+    }
+};
+
+exports.updating = async (req, res, next) => {
+    try {
+        const receiptUploaded = await handleFileUpload(req.file.path);
+
+        const data = await Payment.findOneAndUpdate({ _id: req.params.paymentId },
+            { receipt: receiptUploaded }, { new: true });
+
+        res.status(200).json({ data });
     } catch (error) {
         next((error));
     }
@@ -70,7 +93,8 @@ exports.list = async (req, res, next) => {
  */
 exports.filter = async (req, res, next) => {
     try {
-        const payments = await Payment.find(req.query).populate('user_id').populate('type_id');
+        const filter = req.query || {}
+        const payments = await Payment.find(filter).populate('user_id').populate('type_id');
         const transformedPayments = payments.map((payment) => payment.transform());
         res.json(transformedPayments);
     } catch (error) {

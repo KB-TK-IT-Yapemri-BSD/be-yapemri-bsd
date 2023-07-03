@@ -3,6 +3,7 @@ const { AsyncParser } = require('@json2csv/node');
 const httpStatus = require('http-status');
 const { omit } = require('lodash');
 const User = require('../models/user.model');
+const { handleFileUploadPicture } = require('../../config/cloudinary');
 
 /**
  * Load user and append to req.
@@ -69,15 +70,21 @@ exports.replace = async (req, res, next) => {
  * Update existing user
  * @public
  */
-exports.update = (req, res, next) => {
-  const ommitRole = req.locals.user.role !== 'admin' ? 'role' : '';
-  const updatedUser = omit(req.body, ommitRole);
+exports.update = async (req, res, next) => {
+  let receiptUploaded = ''
+
+  if (req.file) {
+    receiptUploaded = await handleFileUploadPicture(req.file.path);
+  }
+
+  const updatedUser = omit({ ...req.body, picture: receiptUploaded });
   const user = Object.assign(req.locals.user, updatedUser);
 
   user.save()
     .then((savedUser) => res.json(savedUser.transform()))
     .catch((e) => next(User.checkDuplicateEmail(e)));
 };
+
 
 /**
  * Get user list

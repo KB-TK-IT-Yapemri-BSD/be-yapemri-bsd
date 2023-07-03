@@ -6,6 +6,7 @@ const {
     listPayments,
     createPayment,
 } = require('../../validations/payment.validation');
+const upload = require('../../middlewares/multer');
 
 const router = express.Router();
 
@@ -136,7 +137,7 @@ router
        * @apiError (Forbidden 403)    Forbidden Only user with same id or admins can modify the data
        * @apiError (Not Found 404)    NotFound     User does not exist
        */
-    .patch(authorize(), controller.update)
+    .patch(authorize(), upload.single('receipt'), controller.update)
     /**
      * @api {patch} v1/payments/:id Delete Payment
      * @apiDescription Delete a payment
