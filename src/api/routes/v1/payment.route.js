@@ -103,7 +103,7 @@ router
      * @apiError (Forbidden 403)    Forbidden   Only user with same id or admins can access the data
      * @apiError (Not Found 404)    NotFound     User does not exist
      */
-    .get(authorize(ROLE1), controller.get)
+    .get(authorize(), controller.get)
     /**
        * @api {patch} v1/payments/:id Update Payment
        * @apiDescription Update some fields of a payment document

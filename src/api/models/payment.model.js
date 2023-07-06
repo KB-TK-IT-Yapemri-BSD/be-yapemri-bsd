@@ -59,6 +59,7 @@ const paymentSchema = new mongoose.Schema({
     reason: {
         type: String,
         required: false,
+        default: ''
     },
 }, {
     timestamps: true,
@@ -161,6 +162,13 @@ paymentSchema.statics = {
     async listDownload({
         start,
         end,
+        user_id,
+        type_id,
+        payment_date,
+        amount,
+        status,
+        isOverdue,
+        modified,
     }) {
         let result;
         if (start && end) {

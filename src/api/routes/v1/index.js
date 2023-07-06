@@ -8,6 +8,7 @@ const paymentTypeRoutes = require('./paymentType.route');
 const studentRoutes = require('./student.route');
 const parentRoutes = require('./parent.route');
 const staffRoutes = require('./staff.route');
+const evaluationRoutes = require('./evaluation.route');
 
 const router = express.Router();
 
@@ -29,5 +30,5 @@ router.use('/paymentTypes', paymentTypeRoutes);
 router.use('/students', studentRoutes);
 router.use('/parents', parentRoutes);
 router.use('/staffs', staffRoutes);
-
+router.use('/evaluations', evaluationRoutes)
 module.exports = router;

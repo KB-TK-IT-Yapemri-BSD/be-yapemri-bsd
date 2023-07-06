@@ -1,18 +1,33 @@
 const mongoose = require('mongoose');
 const httpStatus = require('http-status');
 const APIError = require('../errors/api-error');
+const Student = require('./student.model');
 
 /**
- * Payment Type Schema
+ * Evaluation Schema
  * @private
  */
-const paymentTypeSchema = new mongoose.Schema({
-    type: {
+const evaluationSchema = new mongoose.Schema({
+    student_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        default: '',
+        ref: Student,
+    },
+    grade: {
         type: String,
         required: true,
     },
-    deadline: {
-        type: Date,
+    period: {
+        type: String,
+        required: true,
+    },
+    score: {
+        type: String,
+        required: true,
+    },
+    description: {
+        type: String,
         required: true,
     },
 }, {
@@ -20,7 +35,7 @@ const paymentTypeSchema = new mongoose.Schema({
 });
 
 /**
- * Add your
+ * Add your-
  * - pre-save hooks
  * - validations
  * - virtuals
@@ -29,10 +44,14 @@ const paymentTypeSchema = new mongoose.Schema({
 /**
  * Methods
  */
-paymentTypeSchema.method({
+evaluationSchema.method({
     transform() {
         const transformed = {};
-        const fields = ['id', 'type', 'deadline', 'createdAt'];
+        const fields = [
+            'id',
+            'student_id', 'grade', 'period', 'score', 'description',
+            'createdAt', 'updatedAt',
+        ];
 
         fields.forEach((field) => {
             transformed[field] = this[field];
@@ -45,39 +64,41 @@ paymentTypeSchema.method({
 /**
  * Statics
  */
-paymentTypeSchema.statics = {
-
+evaluationSchema.statics = {
     /**
-     * Get payment types.
+     * Get evaluation.
      *
-     * @param {ObjectId} id - The objectId of the payment type.
-     * @returns {Promise<PaymentType, APIError>}
+     * @param {ObjectId} id - The objectId of evaluation.
+     * @returns {Promise<Evaluation, APIError>}
      */
     async get(id) {
-        let paymentType;
+        let evaluation;
 
         if (mongoose.Types.ObjectId.isValid(id)) {
-            paymentType = await this.findById(id).exec();
+            evaluation = await this.findById(id)
+                .populate('student_id')
+                .exec();
         }
-        if (paymentType) {
-            return paymentType;
+        if (evaluation) {
+            return evaluation;
         }
 
         throw new APIError({
-            message: 'The payment type does not exist',
+            message: 'The evaluation data does not exist',
             status: httpStatus.NOT_FOUND,
         });
     },
 
     /**
-     * List of payment types in descending order of 'createdAt' timestamp.
+     * List of evaluations in descending order of 'createdAt' timestamp.
      *
-     * @param {number} skip - Number of payment types to be skipped.
-     * @param {number} limit - Limit number of payment types to be returned.
-     * @returns {Promise<PaymentType[]>}
+     * @param {number} skip - Number of evaluations to be skipped.
+     * @param {number} limit - Limit number of evaluations to be returned.
+     * @returns {Promise<Evaluation[]>}
      */
     list({
-        page = 1, perPage = 30,
+        page = 1,
+        perPage = 30,
     }) {
         return this.find()
             .sort({ createdAt: -1 })
@@ -89,42 +110,25 @@ paymentTypeSchema.statics = {
     async listDownload({
         start,
         end,
-        deadline,
     }) {
-        let formData = {}
-
-        if (deadline) {
-            formData.deadline = new Date(deadline)
-        }
-
-        console.log(deadline)
-
         let result;
-
         if (start && end) {
             result = await this.find({
                 createdAt: { $gte: new Date(start), $lte: new Date(end) },
-                ...formData
             });
         } else if (!start && end) {
             result = await this.find({
                 createdAt: { $lte: new Date(end) },
-                ...formData
             });
         } else if (!end && start) {
             result = await this.find({
                 createdAt: { $gte: new Date(start) },
-                ...formData
             });
         } else {
-            result = this.find({ ...formData });
+            result = this.find();
         }
-
         return result;
     },
 };
 
-/**
- * @typedef PaymentType
- */
-module.exports = mongoose.model('PaymentType', paymentTypeSchema);
+module.exports = mongoose.model('Evaluation', evaluationSchema);

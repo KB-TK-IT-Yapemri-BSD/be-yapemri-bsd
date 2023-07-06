@@ -148,23 +148,45 @@ parentSchema.statics = {
     async listDownload({
         start,
         end,
+        gender,
+        religion,
+        citizenship,
     }) {
+        let formData = {}
+
+        if (gender) {
+            formData.gender = gender
+        }
+
+        if (religion) {
+            formData.religion = religion
+        }
+
+        if (citizenship) {
+            formData.citizenship = citizenship
+        }
+
         let result;
+
         if (start && end) {
             result = await this.find({
                 createdAt: { $gte: new Date(start), $lte: new Date(end) },
+                ...formData
             });
         } else if (!start && end) {
             result = await this.find({
                 createdAt: { $lte: new Date(end) },
+                ...formData
             });
         } else if (!end && start) {
             result = await this.find({
                 createdAt: { $gte: new Date(start) },
+                ...formData
             });
         } else {
-            result = this.find();
+            result = this.find({ ...formData });
         }
+
         return result;
     },
 

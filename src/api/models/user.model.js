@@ -246,23 +246,40 @@ userSchema.statics = {
   async listDownload({
     start,
     end,
+    role,
+    biodataType
   }) {
+    let formData = {}
+
+    if (role) {
+      formData.role = role
+    }
+
+    if (biodataType) {
+      formData.biodataType = biodataType
+    }
+
     let result;
+
     if (start && end) {
       result = await this.find({
         createdAt: { $gte: new Date(start), $lte: new Date(end) },
+        ...formData
       });
     } else if (!start && end) {
       result = await this.find({
         createdAt: { $lte: new Date(end) },
+        ...formData
       });
     } else if (!end && start) {
       result = await this.find({
         createdAt: { $gte: new Date(start) },
+        ...formData
       });
     } else {
-      result = this.find();
+      result = this.find({ ...formData });
     }
+
     return result;
   },
 };

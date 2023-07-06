@@ -200,25 +200,63 @@ studentSchema.statics = {
     },
 
     async listDownload({
-        start,
-        end,
+        start, end, grade, birthplace, birthdate, gender, religion, citizenship, bloodType, studentStatus
     }) {
+        let formData = {}
+
+        if (grade) {
+            formData.grade = grade
+        }
+
+        if (birthplace) {
+            formData.birthplace = birthplace
+        }
+
+        if (birthdate) {
+            formData.birthdate = birthdate
+        }
+
+        if (gender) {
+            formData.gender = gender
+        }
+
+        if (religion) {
+            formData.religion = religion
+        }
+
+        if (citizenship) {
+            formData.citizenship = citizenship
+        }
+
+        if (bloodType) {
+            formData.bloodType = bloodType
+        }
+
+        if (studentStatus) {
+            formData.studentStatus = studentStatus
+        }
+
         let result;
+
         if (start && end) {
             result = await this.find({
                 createdAt: { $gte: new Date(start), $lte: new Date(end) },
+                ...formData
             });
         } else if (!start && end) {
             result = await this.find({
                 createdAt: { $lte: new Date(end) },
+                ...formData
             });
         } else if (!end && start) {
             result = await this.find({
                 createdAt: { $gte: new Date(start) },
+                ...formData
             });
         } else {
-            result = this.find();
+            result = this.find({ ...formData });
         }
+
         return result;
     },
 
