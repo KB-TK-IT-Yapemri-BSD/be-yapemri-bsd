@@ -115,6 +115,45 @@ registrationSchema.statics = {
             .exec();
     },
 
+    async formCount() {
+        const dateNow = new Date();
+        const threeYearsBefore = new Date();
+        threeYearsBefore.setFullYear(threeYearsBefore.getFullYear() - 3);
+
+        const forms = await this.aggregate([
+            {
+                $match: {
+                    createdAt: {
+                        $gte: threeYearsBefore,
+                        $lte: dateNow,
+                    },
+                },
+            },
+            {
+                $group: {
+                    _id: {
+                        year: { $year: "$createdAt" },
+                    },
+                    count: { $sum: 1 },
+                },
+            },
+            {
+                $project: {
+                    _id: 0,
+                    year: "$_id.year",
+                    count: 1,
+                },
+            },
+            {
+                $sort: {
+                    year: -1,
+                },
+            },
+        ]);
+
+        return forms;
+    },
+
     async listDownload({
         start,
         end,

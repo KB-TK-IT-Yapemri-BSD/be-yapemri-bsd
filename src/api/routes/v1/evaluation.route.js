@@ -47,7 +47,7 @@ router
      * @apiError (Unauthorized 401)  Unauthorized  Only authenticated users can access the data
      * @apiError (Forbidden 403)     Forbidden     Only admins can access the data
      */
-    .get(authorize(ADMIN), validate(listEvaluations), controller.list)
+    .get(authorize(), validate(listEvaluations), controller.list)
     /**
      * @api {post} v1/evaluations Create Evaluation
      * @apiDescription Create a new evaluation
@@ -87,7 +87,7 @@ router
      *
      * @apiError (Bad Request 400)   ValidationError  Some parameters may contain invalid values
      */
-    .post(authorize(ADMIN), validate(createEvaluation), controller.create);
+    .post(authorize(), validate(createEvaluation), controller.create);
 
 router
     .route('/download')
@@ -167,7 +167,7 @@ router
      * @apiError (Forbidden 403)    Forbidden Only user with same id or admins can modify the data
      * @apiError (Not Found 404)    NotFound     User does not exist
      */
-    .patch(authorize(ADMIN), validate(updateEvaluation), controller.update)
+    .patch(authorize(), validate(updateEvaluation), controller.update)
 
     /**
      * @api {patch} v1/evaluations/:id Delete Evaluation
@@ -185,6 +185,6 @@ router
      * @apiError (Forbidden 403)    Forbidden   Only user with same id or admins can delete the data
      * @apiError (Not Found 404)    NotFound      User does not exist
      */
-    .delete(authorize(ADMIN), controller.remove);
+    .delete(authorize(), controller.remove);
 
 module.exports = router;

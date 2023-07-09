@@ -119,6 +119,10 @@ router
     .get(controller.download);
 
 router
+    .route('/dashboard')
+    .get(controller.dashboard);
+
+router
     .route('/:studentId')
     /**
      * @api {get} v1/students/:id Get Student

@@ -65,6 +65,23 @@ exports.list = async (req, res, next) => {
 };
 
 /**
+ * Get student count
+ * @public
+ */
+exports.dashboard = async (req, res, next) => {
+    try {
+        const students = await Student.formCount();
+        res.json(students)
+        {/**
+        const transformedForms = registrations.map((registration) => registration.transform());
+        res.json(transformedForms);
+         */}
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * Get download student list
  * @public
  */

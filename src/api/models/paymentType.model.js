@@ -97,7 +97,7 @@ paymentTypeSchema.statics = {
             formData.deadline = new Date(deadline)
         }
 
-        console.log(deadline)
+        // console.log(deadline)
 
         let result;
 

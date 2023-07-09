@@ -199,6 +199,88 @@ studentSchema.statics = {
             .exec();
     },
 
+    async formCount() {
+        const dateNow = new Date();
+        const threeYearsBefore = new Date();
+        threeYearsBefore.setFullYear(threeYearsBefore.getFullYear() - 3);
+
+        const students = await this.aggregate([
+            {
+                $match: {
+                    createdAt: {
+                        $gte: threeYearsBefore,
+                        $lte: dateNow,
+                    },
+                },
+            },
+            {
+                $group: {
+                    _id: {
+                        year: { $year: "$createdAt" },
+                        gender: "$gender",
+                    },
+                    count: { $sum: 1 },
+                },
+            },
+            {
+                $group: {
+                    _id: "$_id.year",
+                    counts: {
+                        $push: {
+                            gender: "$_id.gender",
+                            count: "$count",
+                        },
+                    },
+                },
+            },
+            {
+                $project: {
+                    _id: 0,
+                    year: "$_id",
+                    girlCount: {
+                        $arrayElemAt: [
+                            {
+                                $filter: {
+                                    input: "$counts",
+                                    as: "item",
+                                    cond: { $eq: ["$$item.gender", true] },
+                                },
+                            },
+                            0,
+                        ],
+                    },
+                    boyCount: {
+                        $arrayElemAt: [
+                            {
+                                $filter: {
+                                    input: "$counts",
+                                    as: "item",
+                                    cond: { $eq: ["$$item.gender", false] },
+                                },
+                            },
+                            0,
+                        ],
+                    },
+                },
+            },
+            {
+                $sort: {
+                    year: -1,
+                },
+            },
+        ]);
+
+        // Map the counts to the desired structure
+        const result = students.map((student) => ({
+            year: student.year,
+            girlCount: student.girlCount ? student.girlCount.count : 0,
+            boyCount: student.boyCount ? student.boyCount.count : 0,
+        }));
+
+        return result;
+    },
+
+
     async listDownload({
         start, end, grade, birthplace, birthdate, gender, religion, citizenship, bloodType, studentStatus
     }) {

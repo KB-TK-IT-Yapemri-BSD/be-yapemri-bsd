@@ -22,11 +22,59 @@ const evaluationSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    score: {
+    introduction: {
         type: String,
         required: true,
     },
-    description: {
+    aspect_1: {
+        type: String,
+        required: true,
+    },
+    score_aspect_1: {
+        type: String,
+        required: true,
+    },
+    aspect_2: {
+        type: String,
+        required: true,
+    },
+    score_aspect_2: {
+        type: String,
+        required: true,
+    },
+    aspect_3: {
+        type: String,
+        required: true,
+    },
+    score_aspect_3: {
+        type: String,
+        required: true,
+    },
+    aspect_4: {
+        type: String,
+        required: true,
+    },
+    score_aspect_4: {
+        type: String,
+        required: true,
+    },
+    aspect_5: {
+        type: String,
+        required: true,
+    },
+    score_aspect_5: {
+        type: String,
+        required: true,
+    },
+    aspect_6: {
+        type: String,
+        required: true,
+    },
+    score_aspect_6: {
+        type: String,
+        required: true,
+    },
+    closing: {
         type: String,
         required: true,
     },
@@ -49,7 +97,11 @@ evaluationSchema.method({
         const transformed = {};
         const fields = [
             'id',
-            'student_id', 'grade', 'period', 'score', 'description',
+            'student_id', 'grade', 'period',
+            'introduction',
+            'aspect_1', 'aspect_2', 'aspect_3', 'aspect_4', 'aspect_5', 'aspect_6',
+            'score_aspect_1', 'score_aspect_2', 'score_aspect_3', 'score_aspect_4', 'score_aspect_5', 'score_aspect_6',
+            'closing',
             'createdAt', 'updatedAt',
         ];
 
@@ -101,6 +153,7 @@ evaluationSchema.statics = {
         perPage = 30,
     }) {
         return this.find()
+            .populate('student_id')
             .sort({ createdAt: -1 })
             .skip(perPage * (page - 1))
             .limit(perPage)
@@ -110,23 +163,68 @@ evaluationSchema.statics = {
     async listDownload({
         start,
         end,
+        student_id, grade, period,
+        score_aspect_1, score_aspect_2, score_aspect_3, score_aspect_4, score_aspect_5, score_aspect_6
     }) {
+        let formData = {}
+
+        if (student_id) {
+            formData.student_id = student_id
+        }
+
+        if (grade) {
+            formData.grade = grade
+        }
+
+        if (period) {
+            formData.period = period
+        }
+
+        if (score_aspect_1) {
+            formData.score_aspect_1 = score_aspect_1
+        }
+
+        if (score_aspect_2) {
+            formData.score_aspect_2 = score_aspect_2
+        }
+
+        if (score_aspect_3) {
+            formData.score_aspect_3 = score_aspect_3
+        }
+
+        if (score_aspect_4) {
+            formData.score_aspect_4 = score_aspect_4
+        }
+
+        if (score_aspect_5) {
+            formData.score_aspect_5 = score_aspect_5
+        }
+
+        if (score_aspect_6) {
+            formData.score_aspect_6 = score_aspect_6
+        }
+
         let result;
+
         if (start && end) {
             result = await this.find({
                 createdAt: { $gte: new Date(start), $lte: new Date(end) },
+                ...formData
             });
         } else if (!start && end) {
             result = await this.find({
                 createdAt: { $lte: new Date(end) },
+                ...formData
             });
         } else if (!end && start) {
             result = await this.find({
                 createdAt: { $gte: new Date(start) },
+                ...formData
             });
         } else {
-            result = this.find();
+            result = this.find({ ...formData });
         }
+
         return result;
     },
 };

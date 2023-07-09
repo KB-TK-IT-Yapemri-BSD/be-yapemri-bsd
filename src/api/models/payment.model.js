@@ -78,7 +78,7 @@ const paymentSchema = new mongoose.Schema({
 paymentSchema.method({
     transform() {
         const transformed = {};
-        const fields = ['id', 'user_id', 'type_id', 'deadline', 'amount', 'status', 'payment_date', 'receipt', 'isOverdue', 'modified', 'reason', 'createdAt', 'updatedAt'];
+        const fields = ['id', 'user_id', 'type_id', 'amount', 'status', 'payment_date', 'receipt', 'isOverdue', 'modified', 'reason', 'createdAt', 'updatedAt'];
 
         fields.forEach((field) => {
             transformed[field] = this[field];
@@ -165,27 +165,57 @@ paymentSchema.statics = {
         user_id,
         type_id,
         payment_date,
-        amount,
         status,
         isOverdue,
         modified,
     }) {
+        let formData = {}
+
+        if (user_id) {
+            formData.user_id = user_id
+        }
+
+        if (type_id) {
+            formData.type_id = type_id
+        }
+
+        if (payment_date) {
+            formData.payment_date = payment_date
+        }
+
+        if (status) {
+            formData.status = status
+        }
+
+        if (isOverdue) {
+            formData.isOverdue = isOverdue
+        }
+
+        if (modified) {
+            formData.modified = modified
+        }
+
         let result;
+
         if (start && end) {
             result = await this.find({
-                createdAt: { $gte: new Date(start), $lte: new Date(end) },
+                payment_date: { $gte: new Date(start), $lte: new Date(end) },
+                ...formData
             });
         } else if (!start && end) {
             result = await this.find({
-                createdAt: { $lte: new Date(end) },
+                payment_date: { $lte: new Date(end) },
+                ...formData
             });
         } else if (!end && start) {
             result = await this.find({
-                createdAt: { $gte: new Date(start) },
+                payment_date: { $gte: new Date(start) },
+                ...formData
             });
         } else {
-            result = this.find();
+            result = this.find({ ...formData });
         }
+
         return result;
     },
 };

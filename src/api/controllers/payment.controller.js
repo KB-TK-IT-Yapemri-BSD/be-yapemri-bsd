@@ -1,6 +1,7 @@
 const { AsyncParser } = require('@json2csv/node');
 
 const httpStatus = require('http-status');
+const { omit } = require('lodash');
 const Payment = require('../models/payment.model');
 const { handleFileUploadReceipt } = require('../../config/cloudinary');
 
@@ -41,17 +42,18 @@ exports.create = async (req, res, next) => {
 
 exports.update = async (req, res, next) => {
     try {
-        const { payment } = req.locals;
-
-        const { data } = req.body;
+        let receiptUploaded = ''
 
         if (req.file) {
-            const receiptUploaded = await handleFileUploadReceipt(req.file.path);
-
-            await payment.updateOne({ ...data, receipt: receiptUploaded });
-        } else {
-            await payment.updateOne(req.body);
+            receiptUploaded = await handleFileUploadReceipt(req.file.path);
         }
+
+        const updatedPayment = omit({ ...req.body, receipt: receiptUploaded });
+        const payment = Object.assign(req.locals.payment, updatedPayment);
+
+        payment.save()
+            .then((savedPayment) => res.json(savedPayment.transform()))
+            .catch((e) => next(e));
 
         const savedPayment = await Payment.findById(payment._id);
         res.json(savedPayment.transform());
@@ -130,7 +132,7 @@ exports.download = async (req, res, next) => {
                 res.setHeader('Content-Disposition', 'attachment; filename=\"' + `payment_report_start_${new Date(params.start).toLocaleDateString()}.csv` + '\"');
             } else {
                 res.setHeader('Content-Type', 'text/csv');
-                res.setHeader('Content-Disposition', 'attachment; filename=\"' + 'paymentType_report_all.csv' + '\"');
+                res.setHeader('Content-Disposition', 'attachment; filename=\"' + 'payment_report_all.csv' + '\"');
             }
 
             res.status(200).send(csv);

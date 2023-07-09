@@ -82,6 +82,10 @@ router
     .get(controller.download);
 
 router
+    .route('/dashboard')
+    .get(controller.dashboard);
+
+router
     .route('/:formId')
     /**
      * @api {get} v1/forms/:id Get Form
