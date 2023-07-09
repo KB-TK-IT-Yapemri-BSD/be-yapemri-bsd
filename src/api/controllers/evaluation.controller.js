@@ -65,6 +65,22 @@ exports.list = async (req, res, next) => {
 };
 
 /**
+ * Get payments filtered list
+ * @public
+ */
+exports.filter = async (req, res, next) => {
+    try {
+        const filter = req.query || {}
+        const evaluations = await Evaluation.find(filter).populate('student_id')
+        const transformedEvaluations = evaluations.map((evaluation) => evaluation.transform());
+        res.json(transformedEvaluations);
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+/**
  * Get download evaluation list
  * @public
  */

@@ -160,6 +160,26 @@ evaluationSchema.statics = {
             .exec();
     },
 
+    /**
+     * List of evaluations in descending order of 'createdAt' timestamp.
+     *
+     * @param {number} skip - Number of payments to be skipped.
+     * @param {number} limit - Limit number of payments to be returned.
+     * @returns {Promise<Payment[]>}
+     */
+    filter({
+        status,
+        page,
+        perPage,
+    }) {
+        return this.find({ status })
+            .populate('student_id')
+            .sort({ createdAt: -1 })
+            .skip(perPage * (page - 1))
+            .limit(perPage)
+            .exec();
+    },
+
     async listDownload({
         start,
         end,

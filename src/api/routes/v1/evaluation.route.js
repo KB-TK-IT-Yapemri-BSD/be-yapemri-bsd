@@ -90,6 +90,10 @@ router
     .post(authorize(), validate(createEvaluation), controller.create);
 
 router
+    .route('/filter')
+    .get(authorize(), controller.filter);
+
+router
     .route('/download')
     .get(controller.download);
 
