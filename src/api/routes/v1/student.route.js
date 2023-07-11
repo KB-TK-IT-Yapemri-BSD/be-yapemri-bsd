@@ -123,6 +123,10 @@ router
     .get(controller.dashboard);
 
 router
+    .route('/chart-filtered')
+    .get(controller.count);
+
+router
     .route('/:studentId')
     /**
      * @api {get} v1/students/:id Get Student

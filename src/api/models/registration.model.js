@@ -146,7 +146,7 @@ registrationSchema.statics = {
             },
             {
                 $sort: {
-                    year: -1,
+                    year: 1,
                 },
             },
         ]);

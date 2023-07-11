@@ -265,7 +265,7 @@ studentSchema.statics = {
             },
             {
                 $sort: {
-                    year: -1,
+                    year: 1,
                 },
             },
         ]);
@@ -341,6 +341,52 @@ studentSchema.statics = {
 
         return result;
     },
+
+    async filteredCount({
+        start, end, type
+    }) {
+        let result;
+
+        if (start && end) {
+            result = await this.find({
+                createdAt: { $gte: new Date(start), $lte: new Date(end) },
+            });
+        } else if (!start && end) {
+            result = await this.find({
+                createdAt: { $lte: new Date(end) },
+            });
+        } else if (!end && start) {
+            result = await this.find({
+                createdAt: { $gte: new Date(start) },
+            });
+        } else {
+            result = await this.find();
+        }
+
+        // Get the values available for the selected field
+        const values = [...new Set(result.map(item => item[type]))];
+
+        // Count the occurrences for each value
+        const valueCounts = {};
+        result.forEach(item => {
+            const value = item[type];
+            if (value) {
+                if (valueCounts[value]) {
+                    valueCounts[value]++;
+                } else {
+                    valueCounts[value] = 1;
+                }
+            }
+        });
+
+        // Prepare the data in the desired format
+        const chartData = values.map(value => ({
+            value,
+            count: valueCounts[value] || 0
+        }));
+
+        return chartData;
+    }
 
 };
 

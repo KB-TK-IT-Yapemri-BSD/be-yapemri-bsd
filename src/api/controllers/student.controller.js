@@ -82,6 +82,24 @@ exports.dashboard = async (req, res, next) => {
 };
 
 /**
+ * Get count of each property
+ * @public
+ */
+exports.count = async (req, res, next) => {
+    try {
+        const filter = req.query || {}
+        const students = await Student.filteredCount(filter);
+        res.json(students)
+        {/**
+        const transformedForms = registrations.map((registration) => registration.transform());
+        res.json(transformedForms);
+         */}
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * Get download student list
  * @public
  */
