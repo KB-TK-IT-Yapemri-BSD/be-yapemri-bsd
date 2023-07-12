@@ -363,14 +363,12 @@ studentSchema.statics = {
             result = await this.find();
         }
 
-        // Get the values available for the selected field
         const values = [...new Set(result.map(item => item[type]))];
 
-        // Count the occurrences for each value
         const valueCounts = {};
         result.forEach(item => {
             const value = item[type];
-            if (value) {
+            if (value !== undefined) {
                 if (valueCounts[value]) {
                     valueCounts[value]++;
                 } else {
@@ -379,13 +377,13 @@ studentSchema.statics = {
             }
         });
 
-        // Prepare the data in the desired format
         const chartData = values.map(value => ({
             value,
             count: valueCounts[value] || 0
         }));
 
         return chartData;
+
     }
 
 };
