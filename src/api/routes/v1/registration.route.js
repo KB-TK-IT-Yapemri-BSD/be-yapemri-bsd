@@ -86,6 +86,10 @@ router
     .get(controller.dashboard);
 
 router
+    .route('/chart-filtered')
+    .get(controller.count);
+
+router
     .route('/:formId')
     /**
      * @api {get} v1/forms/:id Get Form

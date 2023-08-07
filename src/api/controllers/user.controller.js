@@ -101,6 +101,20 @@ exports.list = async (req, res, next) => {
 };
 
 /**
+ * Get count of each property
+ * @public
+ */
+exports.count = async (req, res, next) => {
+  try {
+    const filter = req.query || {}
+    const users = await User.filteredCount(filter);
+    res.json(users)
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * Get download user list
  * @public
  */

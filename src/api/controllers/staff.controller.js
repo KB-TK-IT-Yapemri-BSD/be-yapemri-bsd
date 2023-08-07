@@ -65,6 +65,20 @@ exports.list = async (req, res, next) => {
 };
 
 /**
+ * Get count of each property
+ * @public
+ */
+exports.count = async (req, res, next) => {
+    try {
+        const filter = req.query || {}
+        const staffs = await Staff.filteredCount(filter);
+        res.json(staffs)
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * Get download staff list
  * @public
  */

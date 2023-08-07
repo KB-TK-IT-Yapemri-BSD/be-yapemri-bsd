@@ -247,6 +247,49 @@ evaluationSchema.statics = {
 
         return result;
     },
+
+    async filteredCount({
+        start, end, type
+    }) {
+        let result;
+
+        if (start && end) {
+            result = await this.find({
+                createdAt: { $gte: new Date(start), $lte: new Date(end) },
+            });
+        } else if (!start && end) {
+            result = await this.find({
+                createdAt: { $lte: new Date(end) },
+            });
+        } else if (!end && start) {
+            result = await this.find({
+                createdAt: { $gte: new Date(start) },
+            });
+        } else {
+            result = await this.find();
+        }
+
+        const values = [...new Set(result.map(item => item[type]))];
+
+        const valueCounts = {};
+        result.forEach(item => {
+            const value = item[type];
+            if (value !== undefined) {
+                if (valueCounts[value]) {
+                    valueCounts[value]++;
+                } else {
+                    valueCounts[value] = 1;
+                }
+            }
+        });
+
+        const chartData = values.map(value => ({
+            value,
+            count: valueCounts[value] || 0
+        }));
+
+        return chartData;
+    },
 };
 
 module.exports = mongoose.model('Evaluation', evaluationSchema);

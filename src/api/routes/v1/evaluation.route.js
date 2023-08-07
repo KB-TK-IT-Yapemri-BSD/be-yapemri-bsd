@@ -98,6 +98,10 @@ router
     .get(controller.download);
 
 router
+    .route('/chart-filtered')
+    .get(controller.count);
+
+router
     .route('/:evaluationId')
     /**
      * @api {get} v1/evaluations/:id Get Evaluation

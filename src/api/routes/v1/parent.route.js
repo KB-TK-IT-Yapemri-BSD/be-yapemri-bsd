@@ -107,6 +107,10 @@ router
     .get(controller.download);
 
 router
+    .route('/chart-filtered')
+    .get(controller.count);
+
+router
     .route('/:parentId')
     /**
      * @api {get} v1/parents/:id Get Parent

@@ -53,6 +53,20 @@ exports.list = async (req, res, next) => {
 };
 
 /**
+ * Get count of each property
+ * @public
+ */
+exports.count = async (req, res, next) => {
+    try {
+        const filter = req.query || {}
+        const registrations = await Registration.filteredCount(filter);
+        res.json(registrations)
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * Get form count
  * @public
  */

@@ -94,6 +94,10 @@ router
     .get(controller.download);
 
 router
+    .route('/chart-filtered')
+    .get(controller.count);
+
+router
     .route('/:staffId')
     /**
      * @api {get} v1/staffs/:id Get Staff

@@ -62,6 +62,10 @@ router
     .get(controller.download);
 
 router
+    .route('/chart-filtered')
+    .get(controller.count);
+
+router
     .route('/:paymentTypeId')
     /**
      * @api {get} v1/payments/types/:id Get Payment Type

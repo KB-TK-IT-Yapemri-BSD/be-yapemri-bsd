@@ -53,6 +53,20 @@ exports.list = async (req, res, next) => {
 };
 
 /**
+ * Get count of each property
+ * @public
+ */
+exports.count = async (req, res, next) => {
+    try {
+        const filter = req.query || {}
+        const paymentTypes = await PaymentType.filteredCount(filter);
+        res.json(paymentTypes)
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * Get download payment type list
  * @public
  */

@@ -65,6 +65,20 @@ exports.list = async (req, res, next) => {
 };
 
 /**
+ * Get count of each property
+ * @public
+ */
+exports.count = async (req, res, next) => {
+    try {
+        const filter = req.query || {}
+        const evaluations = await Evaluation.filteredCount(filter);
+        res.json(evaluations)
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * Get payments filtered list
  * @public
  */

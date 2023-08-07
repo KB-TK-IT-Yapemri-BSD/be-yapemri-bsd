@@ -92,6 +92,10 @@ router
   .get(controller.download);
 
 router
+  .route('/chart-filtered')
+  .get(controller.count);
+
+router
   .route('/:userId')
   /**
    * @api {get} v1/users/:id Get User

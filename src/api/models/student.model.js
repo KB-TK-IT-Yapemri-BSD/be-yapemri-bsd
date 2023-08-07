@@ -383,9 +383,7 @@ studentSchema.statics = {
         }));
 
         return chartData;
-
     }
-
 };
 
 module.exports = mongoose.model('Student', studentSchema);

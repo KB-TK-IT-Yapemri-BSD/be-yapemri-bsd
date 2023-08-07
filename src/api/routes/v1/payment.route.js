@@ -78,6 +78,10 @@ router
     .get(controller.download);
 
 router
+    .route('/chart-filtered')
+    .get(controller.count);
+
+router
     .route('/:paymentId')
     /**
      * @api {get} v1/payments/:id Get Payment

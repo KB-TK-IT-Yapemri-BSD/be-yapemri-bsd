@@ -65,6 +65,20 @@ exports.list = async (req, res, next) => {
 };
 
 /**
+ * Get count of each property
+ * @public
+ */
+exports.count = async (req, res, next) => {
+    try {
+        const filter = req.query || {}
+        const parents = await Parent.filteredCount(filter);
+        res.json(parents)
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * Get download parent list
  * @public
  */
