@@ -1,75 +1,92 @@
-const mongoose = require('mongoose');
-const httpStatus = require('http-status');
-const { omitBy, isNil } = require('lodash');
-const bcrypt = require('bcryptjs');
-const moment = require('moment-timezone');
-const jwt = require('jwt-simple');
-const uuidv4 = require('uuid/v4');
-const APIError = require('../errors/api-error');
-const { env, jwtSecret, jwtExpirationInterval } = require('../../config/vars');
+const mongoose = require("mongoose");
+const httpStatus = require("http-status");
+const { omitBy, isNil } = require("lodash");
+const bcrypt = require("bcryptjs");
+const moment = require("moment-timezone");
+const jwt = require("jwt-simple");
+const uuidv4 = require("uuid/v4");
+const APIError = require("../errors/api-error");
+const { env, jwtSecret, jwtExpirationInterval } = require("../../config/vars");
 
 /**
-* User Roles
-*/
-const roles = ['parents', 'principal', 'teachers', 'admin'];
-const Biodata = ['Student', 'Staff'];
+ * User Roles
+ */
+const roles = [
+  "parents",
+  "principal",
+  "teachers",
+  "secondary_teachers",
+  "supervisors",
+  "admin",
+];
+const biodata = ["Student", "Staff"];
+const status = ["requested", "edited", "approved", "rejected"];
 
 /**
  * User Schema
  * @private
  */
 
-const userSchema = new mongoose.Schema({
-  email: {
-    type: String,
-    match: /^\S+@\S+\.\S+$/,
-    required: true,
-    unique: true,
-    trim: true,
-    lowercase: true,
+const userSchema = new mongoose.Schema(
+  {
+    email: {
+      type: String,
+      match: /^\S+@\S+\.\S+$/,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
+      maxlength: 128,
+    },
+    name: {
+      type: String,
+      maxlength: 128,
+      index: true,
+      trim: true,
+    },
+    services: {
+      facebook: String,
+      google: String,
+    },
+    role: {
+      type: String,
+      enum: roles,
+      required: true,
+      // default: 'user',
+    },
+    picture: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    biodata_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: false,
+      default: undefined,
+      refPath: "biodataType",
+    },
+    biodataType: {
+      type: String,
+      required: false,
+      default: undefined,
+      enum: biodata,
+    },
+    status: {
+      type: String,
+      required: false,
+      default: "requested",
+      enum: status,
+    },
   },
-  password: {
-    type: String,
-    required: true,
-    minlength: 6,
-    maxlength: 128,
-  },
-  name: {
-    type: String,
-    maxlength: 128,
-    index: true,
-    trim: true,
-  },
-  services: {
-    facebook: String,
-    google: String,
-  },
-  role: {
-    type: String,
-    enum: roles,
-    required: true,
-    // default: 'user',
-  },
-  picture: {
-    type: String,
-    trim: true,
-    default: '',
-  },
-  biodata_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: false,
-    default: undefined,
-    refPath: 'biodataType',
-  },
-  biodataType: {
-    type: String,
-    required: false,
-    default: undefined,
-    enum: Biodata,
-  },
-}, {
-  timestamps: true,
-});
+  {
+    timestamps: true,
+  }
+);
 
 /**
  * Add your
@@ -78,11 +95,11 @@ const userSchema = new mongoose.Schema({
  * - virtuals
  */
 
-userSchema.pre('save', async function save(next) {
+userSchema.pre("save", async function save(next) {
   try {
-    if (!this.isModified('password')) return next();
+    if (!this.isModified("password")) return next();
 
-    const rounds = env === 'test' ? 1 : 10;
+    const rounds = env === "test" ? 1 : 10;
 
     const hash = await bcrypt.hash(this.password, rounds);
     this.password = hash;
@@ -99,7 +116,17 @@ userSchema.pre('save', async function save(next) {
 userSchema.method({
   transform() {
     const transformed = {};
-    const fields = ['id', 'name', 'email', 'role', 'biodata_id', 'biodataType', 'picture', 'createdAt'];
+    const fields = [
+      "id",
+      "name",
+      "email",
+      "role",
+      "biodata_id",
+      "biodataType",
+      "status",
+      "picture",
+      "createdAt",
+    ];
 
     fields.forEach((field) => {
       transformed[field] = this[field];
@@ -110,7 +137,7 @@ userSchema.method({
 
   token() {
     const payload = {
-      exp: moment().add(jwtExpirationInterval, 'minutes').unix(),
+      exp: moment().add(jwtExpirationInterval, "minutes").unix(),
       iat: moment().unix(),
       sub: this._id,
     };
@@ -126,7 +153,6 @@ userSchema.method({
  * Statics
  */
 userSchema.statics = {
-
   roles,
 
   /**
@@ -146,7 +172,7 @@ userSchema.statics = {
     }
 
     throw new APIError({
-      message: 'User does not exist',
+      message: "User does not exist",
       status: httpStatus.NOT_FOUND,
     });
   },
@@ -159,7 +185,10 @@ userSchema.statics = {
    */
   async findAndGenerateToken(options) {
     const { email, password, refreshObject } = options;
-    if (!email) throw new APIError({ message: 'An email is required to generate a token' });
+    if (!email)
+      throw new APIError({
+        message: "An email is required to generate a token",
+      });
 
     const user = await this.findOne({ email }).exec();
     const err = {
@@ -167,18 +196,18 @@ userSchema.statics = {
       isPublic: true,
     };
     if (password) {
-      if (user && await user.passwordMatches(password)) {
+      if (user && (await user.passwordMatches(password))) {
         return { user, accessToken: user.token() };
       }
-      err.message = 'Incorrect email or password';
+      err.message = "Incorrect email or password";
     } else if (refreshObject && refreshObject.userEmail === email) {
       if (moment(refreshObject.expires).isBefore()) {
-        err.message = 'Invalid refresh token.';
+        err.message = "Invalid refresh token.";
       } else {
         return { user, accessToken: user.token() };
       }
     } else {
-      err.message = 'Incorrect email or refreshToken';
+      err.message = "Incorrect email or refreshToken";
     }
     throw new APIError(err);
   },
@@ -190,13 +219,11 @@ userSchema.statics = {
    * @param {number} limit - Limit number of users to be returned.
    * @returns {Promise<User[]>}
    */
-  list({
-    page = 1, perPage = 30, name, email, role,
-  }) {
+  list({ page = 1, perPage = 30, name, email, role }) {
     const options = omitBy({ name, email, role }, isNil);
 
     return this.find(options)
-      .populate('biodata_id')
+      .populate("biodata_id")
       .sort({ createdAt: -1 })
       .skip(perPage * (page - 1))
       .limit(perPage)
@@ -211,14 +238,16 @@ userSchema.statics = {
    * @returns {Error|APIError}
    */
   checkDuplicateEmail(error) {
-    if (error.name === 'MongoError' && error.code === 11000) {
+    if (error.name === "MongoError" && error.code === 11000) {
       return new APIError({
-        message: 'Validation Error',
-        errors: [{
-          field: 'email',
-          location: 'body',
-          messages: ['"email" already exists'],
-        }],
+        message: "Validation Error",
+        errors: [
+          {
+            field: "email",
+            location: "body",
+            messages: ['"email" already exists'],
+          },
+        ],
         status: httpStatus.CONFLICT,
         isPublic: true,
         stack: error.stack,
@@ -227,10 +256,10 @@ userSchema.statics = {
     return error;
   },
 
-  async oAuthLogin({
-    service, id, email, name, picture,
-  }) {
-    const user = await this.findOne({ $or: [{ [`services.${service}`]: id }, { email }] });
+  async oAuthLogin({ service, id, email, name, picture }) {
+    const user = await this.findOne({
+      $or: [{ [`services.${service}`]: id }, { email }],
+    });
     if (user) {
       user.services[service] = id;
       if (!user.name) user.name = name;
@@ -239,24 +268,23 @@ userSchema.statics = {
     }
     const password = uuidv4();
     return this.create({
-      services: { [service]: id }, email, password, name, picture,
+      services: { [service]: id },
+      email,
+      password,
+      name,
+      picture,
     });
   },
 
-  async listDownload({
-    start,
-    end,
-    role,
-    biodataType
-  }) {
-    let formData = {}
+  async listDownload({ start, end, role, biodataType }) {
+    let formData = {};
 
     if (role) {
-      formData.role = role
+      formData.role = role;
     }
 
     if (biodataType) {
-      formData.biodataType = biodataType
+      formData.biodataType = biodataType;
     }
 
     let result;
@@ -264,17 +292,17 @@ userSchema.statics = {
     if (start && end) {
       result = await this.find({
         createdAt: { $gte: new Date(start), $lte: new Date(end) },
-        ...formData
+        ...formData,
       });
     } else if (!start && end) {
       result = await this.find({
         createdAt: { $lte: new Date(end) },
-        ...formData
+        ...formData,
       });
     } else if (!end && start) {
       result = await this.find({
         createdAt: { $gte: new Date(start) },
-        ...formData
+        ...formData,
       });
     } else {
       result = this.find({ ...formData });
@@ -283,9 +311,7 @@ userSchema.statics = {
     return result;
   },
 
-  async filteredCount({
-    start, end, type
-  }) {
+  async filteredCount({ start, end, type }) {
     let result;
 
     if (start && end) {
@@ -304,10 +330,10 @@ userSchema.statics = {
       result = await this.find();
     }
 
-    const values = [...new Set(result.map(item => item[type]))];
+    const values = [...new Set(result.map((item) => item[type]))];
 
     const valueCounts = {};
-    result.forEach(item => {
+    result.forEach((item) => {
       const value = item[type];
       if (value !== undefined) {
         if (valueCounts[value]) {
@@ -318,9 +344,9 @@ userSchema.statics = {
       }
     });
 
-    const chartData = values.map(value => ({
+    const chartData = values.map((value) => ({
       value,
-      count: valueCounts[value] || 0
+      count: valueCounts[value] || 0,
     }));
 
     return chartData;
@@ -330,4 +356,4 @@ userSchema.statics = {
 /**
  * @typedef User
  */
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model("User", userSchema);

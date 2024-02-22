@@ -1,21 +1,19 @@
-const express = require('express');
-const validate = require('express-validation');
-const controller = require('../../controllers/user.controller');
-const { authorize, ADMIN } = require('../../middlewares/auth');
-const {
-  updateUser,
-} = require('../../validations/user.validation');
-const upload = require('../../middlewares/multer');
+const express = require("express");
+const validate = require("express-validation");
+const controller = require("../../controllers/user.controller");
+const approvalController = require("../../controllers/approval.controller");
+const { authorize, ADMIN } = require("../../middlewares/auth");
+const upload = require("../../middlewares/multer");
 
 const router = express.Router();
 
 /**
  * Load user when API with userId route parameter is hit
  */
-router.param('userId', controller.load);
+router.param("userId", controller.load);
 
 router
-  .route('/')
+  .route("/")
   /**
    * @api {get} v1/users List Users
    * @apiDescription Get a list of users
@@ -63,10 +61,10 @@ router
    * @apiError (Unauthorized 401)  Unauthorized     Only authenticated users can create the data
    * @apiError (Forbidden 403)     Forbidden        Only admins can create the data
    */
-  .post(authorize(), controller.create);
+  .post(authorize(), controller.create, approvalController.create);
 
 router
-  .route('/profile')
+  .route("/profile")
   /**
    * @api {get} v1/users/profile User Profile
    * @apiDescription Get logged in user profile information
@@ -87,16 +85,12 @@ router
    */
   .get(authorize(), controller.loggedIn);
 
-router
-  .route('/download')
-  .get(controller.download);
+router.route("/download").get(controller.download);
+
+router.route("/chart-filtered").get(controller.count);
 
 router
-  .route('/chart-filtered')
-  .get(controller.count);
-
-router
-  .route('/:userId')
+  .route("/:userId")
   /**
    * @api {get} v1/users/:id Get User
    * @apiDescription Get user information
@@ -173,7 +167,7 @@ router
    * @apiError (Forbidden 403)    Forbidden    Only user with same id or admins can modify the data
    * @apiError (Not Found 404)    NotFound     User does not exist
    */
-  .patch(authorize(ADMIN), upload.single('picture'), controller.update)
+  .patch(authorize(ADMIN), upload.single("picture"), controller.update)
   /**
    * @api {patch} v1/users/:id Delete User
    * @apiDescription Delete a user

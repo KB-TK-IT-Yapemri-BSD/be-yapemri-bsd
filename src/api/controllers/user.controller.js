@@ -1,9 +1,9 @@
-const { AsyncParser } = require('@json2csv/node');
+const { AsyncParser } = require("@json2csv/node");
 
-const httpStatus = require('http-status');
-const { omit } = require('lodash');
-const User = require('../models/user.model');
-const { handleFileUploadPicture } = require('../../config/cloudinary');
+const httpStatus = require("http-status");
+const { omit } = require("lodash");
+const User = require("../models/user.model");
+const { handleFileUploadPicture } = require("../../config/cloudinary");
 
 /**
  * Load user and append to req.
@@ -41,6 +41,7 @@ exports.create = async (req, res, next) => {
     const savedUser = await user.save();
     res.status(httpStatus.CREATED);
     res.json(savedUser.transform());
+    next();
   } catch (error) {
     next(User.checkDuplicateEmail(error));
   }
@@ -55,7 +56,7 @@ exports.replace = async (req, res, next) => {
     const { user } = req.locals;
     const newUser = new User(req.body);
     // const ommitRole = user.role !== 'admin' ? 'role' : '';
-    const newUserObject = omit(newUser.toObject(), '_id');
+    const newUserObject = omit(newUser.toObject(), "_id");
 
     await user.updateOne(newUserObject, { override: true, upsert: true });
     const savedUser = await User.findById(user._id);
@@ -71,7 +72,7 @@ exports.replace = async (req, res, next) => {
  * @public
  */
 exports.update = async (req, res, next) => {
-  let receiptUploaded = ''
+  let receiptUploaded = "";
 
   if (req.file) {
     receiptUploaded = await handleFileUploadPicture(req.file.path);
@@ -80,11 +81,11 @@ exports.update = async (req, res, next) => {
   const updatedUser = omit({ ...req.body, picture: receiptUploaded });
   const user = Object.assign(req.locals.user, updatedUser);
 
-  user.save()
+  user
+    .save()
     .then((savedUser) => res.json(savedUser.transform()))
     .catch((e) => next(User.checkDuplicateEmail(e)));
 };
-
 
 /**
  * Get user list
@@ -106,9 +107,9 @@ exports.list = async (req, res, next) => {
  */
 exports.count = async (req, res, next) => {
   try {
-    const filter = req.query || {}
+    const filter = req.query || {};
     const users = await User.filteredCount(filter);
-    res.json(users)
+    res.json(users);
   } catch (error) {
     next(error);
   }
@@ -132,17 +133,41 @@ exports.download = async (req, res, next) => {
       const csv = await parser.parse(transformedUsers).promise();
 
       if (params.start && params.end) {
-        res.setHeader('Content-Type', 'text/csv');
-        res.setHeader('Content-Disposition', 'attachment; filename=\"' + `user_report_start_${new Date(params.start).toLocaleDateString()}_end_${new Date(params.end).toLocaleDateString()}.csv` + '\"');
+        res.setHeader("Content-Type", "text/csv");
+        res.setHeader(
+          "Content-Disposition",
+          'attachment; filename="' +
+            `user_report_start_${new Date(
+              params.start
+            ).toLocaleDateString()}_end_${new Date(
+              params.end
+            ).toLocaleDateString()}.csv` +
+            '"'
+        );
       } else if (!params.start && params.end) {
-        res.setHeader('Content-Type', 'text/csv');
-        res.setHeader('Content-Disposition', 'attachment; filename=\"' + `user_report_end_${new Date(params.end).toLocaleDateString()}.csv` + '\"');
+        res.setHeader("Content-Type", "text/csv");
+        res.setHeader(
+          "Content-Disposition",
+          'attachment; filename="' +
+            `user_report_end_${new Date(params.end).toLocaleDateString()}.csv` +
+            '"'
+        );
       } else if (!params.end && params.start) {
-        res.setHeader('Content-Type', 'text/csv');
-        res.setHeader('Content-Disposition', 'attachment; filename=\"' + `user_report_start_${new Date(params.start).toLocaleDateString()}.csv` + '\"');
+        res.setHeader("Content-Type", "text/csv");
+        res.setHeader(
+          "Content-Disposition",
+          'attachment; filename="' +
+            `user_report_start_${new Date(
+              params.start
+            ).toLocaleDateString()}.csv` +
+            '"'
+        );
       } else {
-        res.setHeader('Content-Type', 'text/csv');
-        res.setHeader('Content-Disposition', 'attachment; filename=\"' + 'user_report_all.csv' + '\"');
+        res.setHeader("Content-Type", "text/csv");
+        res.setHeader(
+          "Content-Disposition",
+          'attachment; filename="' + "user_report_all.csv" + '"'
+        );
       }
 
       res.status(200).send(csv);
@@ -161,7 +186,8 @@ exports.download = async (req, res, next) => {
 exports.remove = (req, res, next) => {
   const { user } = req.locals;
 
-  user.remove()
+  user
+    .remove()
     .then(() => res.status(httpStatus.NO_CONTENT).end())
     .catch((e) => next(e));
 };
