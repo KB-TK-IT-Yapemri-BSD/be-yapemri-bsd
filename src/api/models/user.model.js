@@ -20,7 +20,8 @@ const roles = [
   "admin",
 ];
 const biodata = ["Student", "Staff"];
-const status = ["requested", "edited", "approved", "rejected"];
+
+const status = ["requested", "edited", "approved", "rejected", "reviewed"];
 
 /**
  * User Schema
@@ -219,15 +220,27 @@ userSchema.statics = {
    * @param {number} limit - Limit number of users to be returned.
    * @returns {Promise<User[]>}
    */
-  list({ page = 1, perPage = 30, name, email, role }) {
-    const options = omitBy({ name, email, role }, isNil);
+  list(payload) {
+    // const options = omitBy({ name, email, role }, isNil);
 
-    return this.find(options)
-      .populate("biodata_id")
-      .sort({ createdAt: -1 })
-      .skip(perPage * (page - 1))
-      .limit(perPage)
-      .exec();
+    const { limit, offset, ...queryOptions } = payload; // Set default values
+
+    // Construct query options dynamically
+    const options = { ...queryOptions };
+
+    if (!limit && !offset) {
+      return this.find(options)
+        .populate("biodata_id")
+        .sort({ createdAt: -1 })
+        .exec();
+    } else {
+      return this.find(options)
+        .populate("biodata_id")
+        .sort({ createdAt: -1 })
+        .skip(offset)
+        .limit(limit)
+        .exec();
+    }
   },
 
   /**

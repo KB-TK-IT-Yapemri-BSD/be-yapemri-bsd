@@ -2,8 +2,10 @@ const express = require("express");
 const validate = require("express-validation");
 const controller = require("../../controllers/user.controller");
 const approvalController = require("../../controllers/approval.controller");
+
 const { authorize, ADMIN } = require("../../middlewares/auth");
 const upload = require("../../middlewares/multer");
+const { createUser } = require("../../validations/user.validation");
 
 const router = express.Router();
 
@@ -61,7 +63,7 @@ router
    * @apiError (Unauthorized 401)  Unauthorized     Only authenticated users can create the data
    * @apiError (Forbidden 403)     Forbidden        Only admins can create the data
    */
-  .post(authorize(), controller.create, approvalController.create);
+  .post(authorize(ADMIN), validate(createUser), controller.create);
 
 router
   .route("/profile")

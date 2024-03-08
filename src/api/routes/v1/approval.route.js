@@ -1,7 +1,7 @@
 const express = require("express");
-const validate = require("express-validation");
+
 const controller = require("../../controllers/approval.controller");
-const { authorize, ADMIN } = require("../../middlewares/auth");
+const { authorize } = require("../../middlewares/auth");
 
 const router = express.Router();
 
@@ -14,9 +14,12 @@ router
 
 router
   .route("/:approvalId")
-  .get(authorize(ADMIN), controller.get)
-  .put(authorize(ADMIN), controller.replace)
-  .patch(authorize(ADMIN), controller.update)
+  .get(authorize(), controller.get)
+  .put(authorize(), controller.replace)
+  .patch(authorize(), controller.update)
   .delete(authorize(), controller.remove);
+
+router.route("/:approvalId/approved").patch(authorize(), controller.approve);
+router.route("/:approvalId/rejected").patch(authorize(), controller.reject);
 
 module.exports = router;
