@@ -145,7 +145,20 @@ evaluationSchema.statics = {
     let evaluation;
 
     if (mongoose.Types.ObjectId.isValid(id)) {
-      evaluation = await this.findById(id).populate("student_id").exec();
+      evaluation = await this.findById(id)
+        .populate({
+          path: "student_id",
+          populate: {
+            path: "mother_id",
+          },
+        })
+        .populate({
+          path: "student_id",
+          populate: {
+            path: "father_id",
+          },
+        })
+        .exec();
     }
     if (evaluation) {
       let user = await User.findOne({ biodata_id: evaluation.student_id._id });
