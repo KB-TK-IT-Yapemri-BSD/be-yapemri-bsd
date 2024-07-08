@@ -162,12 +162,12 @@ exports.approve = async (req, res, next) => {
       if (checkedApproval.type === "add") {
         await User.updateOne(
           { _id: checkedApproval.userID },
-          { status: "approved" }
+          { dataStatus: "approved" }
         );
       } else if (checkedApproval.type === "edit") {
         await User.updateOne(
           { _id: checkedApproval.userID },
-          { status: "approved" }
+          { dataStatus: "approved" }
         );
       } else if (checkedApproval.type === "delete") {
         await User.findByIdAndDelete({ _id: checkedApproval.userID });
@@ -178,12 +178,12 @@ exports.approve = async (req, res, next) => {
       if (checkedApproval.type === "add") {
         await Staff.updateOne(
           { _id: checkedApproval.staffID },
-          { status: "approved" }
+          { dataStatus: "approved" }
         );
       } else if (checkedApproval.type === "edit") {
         await Staff.updateOne(
           { _id: checkedApproval.staffID },
-          { status: "approved" }
+          { dataStatus: "approved" }
         );
       } else if (checkedApproval.type === "delete") {
         await Staff.findByIdAndDelete({ _id: checkedApproval.staffID });
@@ -194,12 +194,12 @@ exports.approve = async (req, res, next) => {
       if (checkedApproval.type === "add") {
         await Student.updateOne(
           { _id: checkedApproval.studentID },
-          { status: "approved" }
+          { dataStatus: "approved" }
         );
       } else if (checkedApproval.type === "edit") {
         await Student.updateOne(
           { _id: checkedApproval.studentID },
-          { status: "approved" }
+          { dataStatus: "approved" }
         );
       } else if (checkedApproval.type === "delete") {
         await Student.findByIdAndDelete({ _id: checkedApproval.studentID });
@@ -210,12 +210,12 @@ exports.approve = async (req, res, next) => {
       if (checkedApproval.type === "add") {
         await Parent.updateOne(
           { _id: checkedApproval.parentID },
-          { status: "approved" }
+          { dataStatus: "approved" }
         );
       } else if (checkedApproval.type === "edit") {
         await Parent.updateOne(
           { _id: checkedApproval.parentID },
-          { status: "approved" }
+          { dataStatus: "approved" }
         );
       } else if (checkedApproval.type === "delete") {
         await Parent.findByIdAndDelete({ _id: checkedApproval.parentID });
@@ -263,28 +263,28 @@ exports.reject = async (req, res, next) => {
     case "Akun":
       await User.updateOne(
         { _id: checkedApproval.userID },
-        { status: "rejected" }
+        { dataStatus: "rejected" }
       );
       break;
 
     case "Staff":
       await Staff.updateOne(
         { _id: checkedApproval.staffID },
-        { status: "rejected" }
+        { dataStatus: "rejected" }
       );
       break;
 
     case "Murid":
       await Student.updateOne(
         { _id: checkedApproval.studentID },
-        { status: "rejected" }
+        { dataStatus: "rejected" }
       );
       break;
 
     case "Wali Murid":
       await Parent.updateOne(
         { _id: checkedApproval.parentID },
-        { status: "rejected" }
+        { dataStatus: "rejected" }
       );
       break;
   }

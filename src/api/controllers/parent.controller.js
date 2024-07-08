@@ -1,4 +1,5 @@
 const { AsyncParser } = require("@json2csv/node");
+const nodemailer = require("nodemailer");
 
 const httpStatus = require("http-status");
 const Parent = require("../models/parent.model");
